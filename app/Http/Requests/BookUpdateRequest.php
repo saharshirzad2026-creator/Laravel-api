@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class BookInsertRequest extends FormRequest
+class BookUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,17 +23,15 @@ class BookInsertRequest extends FormRequest
     {
         return [
             //
-            "title"=> "required|string|min:7",
-            "isbn"=> ["required","string",
-            Rule::unique('books','isbn')->ignore($this->route('book'),'id')
-            ],
+            "title"=> "nullable|string|min:7",
+            "isbn"=> "nullable|string",
             "description"=> "nullable|string",
-            "published_at"=> "required|date",
+            "published_at"=> "nullable|date",
             "total_copies"=> "nullable|integer|max:200",
-            "cover_image"=> "required|string",
-            "price"=> "required|numeric",
-            "author_id"=> "required|integer|exists:author,id",
-            "genra"=> "required|string",
+            "cover_image"=> "nullable|string",
+            "price"=> "nullable|numeric",
+            "author_id"=> "nullable|integer|exists:author,id",
+            "genra"=> "nullable|string",
         ];
     }
 }
