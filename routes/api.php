@@ -12,9 +12,12 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // Author
-Route::apiResource('author',AuthorController::class);
+Route::middleware('auth:sanctum')->group(function(){
+    Route::apiResource('author',AuthorController::class);
+    Route::apiResource('book',BookController::class);
+    Route::post('logout',[AuthController::class, 'logout']);
+});
 // Book
-Route::apiResource('book',BookController::class);
 // Member
 Route::apiResource('member',MemberController::class);
 // Borrowing
@@ -23,3 +26,7 @@ Route::apiResource('borrow',BorrowingController::class)->only('index','store','s
 Route::post('borrow/{borrowing}/return', [BorrowingController::class, 'returnBook']);
 
 Route::get('borrow/overdue/list',[BorrowingController::class, 'overdue']);
+
+// authentication routes
+Route::post('register', [AuthController::class, 'register']);
+Route::post('login', [AuthController::class, 'login']);

@@ -16,6 +16,9 @@ class BookController extends Controller
     public function index(Request $request)
     {
         //
+        if(!$request->user()->tokenCan('read-book')){
+            abort('300', "you are not allowed");
+        }
         $query = Book::with('author');
         if($request->has('search')){
             $search = $request->search;
@@ -25,7 +28,6 @@ class BookController extends Controller
                 ->orWhereHas('author',function($authorQuery)use($search){
                     $authorQuery->where('name','LIKE',"%{$search}%");
                 });
-                ;
             });
         }
         $books = $query->paginate(10);
@@ -38,16 +40,23 @@ class BookController extends Controller
     public function store(BookInsertRequest $request)
     {
         //
+        if(!$request->user()->tokenCan('insert-book')){
+            abort('303', "you are not allowed");
+        }
         $book = Book::create($request->validated());
+        $book->load('author');
         return new BookResource($book);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Book $book)
+    public function show(Request $request, Book $book)
     {
         //
+        if(!$request->user()->tokenCan('read-book')){
+            abort('304', 'you are not allowed');
+        }
         $book->load("author");
         return new BookResource($book);
     }
@@ -58,6 +67,9 @@ class BookController extends Controller
     public function update(BookUpdateRequest $request, Book $book)
     {
         //
+        if(!$request->user()->tokenCan('update-book')){
+            abort('303', 'you are not allowed to update the book');
+        }
         $book->update($request->validated());
         $book->load('author');
         return new BookResource($book);
@@ -66,10 +78,13 @@ class BookController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         //
         try{
+            if($request->user()->tokenCan('delete-book')){
+                abort('304', 'you can not delete the book');
+            }
             $book = Book::findOrFail($id);
             $book->delete();
             return response()->json([
